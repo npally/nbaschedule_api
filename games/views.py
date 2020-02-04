@@ -2,17 +2,23 @@ from .models import Game
 from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .serializers import GameSerializer
+from rest_framework.mixins import ListModelMixin
 import datetime
 
 
 # Create your views here.
-class GameViewSet(viewsets.ModelViewSet):
+class AllGameView(generics.ListAPIView, ListModelMixin):
     """
     API endpoint that shows all games
     """
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Game.objects.all()
     serializer_class = GameSerializer
+
+class SingleGameView(generics.RetrieveAPIView):
+    queryset = Game.objects.all()
+    serializer_class = GameSerializer
+
 
 class TeamGameView(generics.ListAPIView):
     """
@@ -42,3 +48,16 @@ class DateGameView(generics.ListAPIView):
         date = datetime.date(year, month, day)
         games = Game.objects.filter(date_time__date = date)
         return games
+
+class TodayGameView(generics.ListAPIView):
+    """
+    Returns all of today's NBA games
+    """
+    serializer_class = GameSerializer
+
+    def get_queryset(self):
+        today = datetime.date.today()
+        games = Game.objects.filter(date_time__date = today)
+        return games
+        
+    
